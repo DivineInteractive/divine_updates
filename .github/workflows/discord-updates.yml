@@ -57,21 +57,30 @@ jobs:
             CHANGELOG=$(jq -r '.changelog // "No changelog provided."' "$file")
             STORE=$(jq -r '.store // empty' "$file")
 
-            DESCRIPTION="**Resource:** \`$RESOURCE\`\n**Version:** \`$VERSION\`\n\n**Changes**\n$CHANGELOG"
-
-            if [ -n "$STORE" ]; then
-              DESCRIPTION="$DESCRIPTION\n\n[View on Tebex]($STORE)"
-            fi
-
-            PAYLOAD=$(jq -n               --arg username "Divine Interactive"               --arg title "📝 $NAME Update"               --arg description "$DESCRIPTION"               '{
+            PAYLOAD=$(jq -n \
+              --arg username "Divine Interactive" \
+              --arg title "📝 $NAME Update" \
+              --arg resource "$RESOURCE" \
+              --arg version "$VERSION" \
+              --arg changelog "$CHANGELOG" \
+              --arg store "$STORE" \
+              '{
                 username: $username,
                 embeds: [{
                   title: $title,
-                  description: $description,
+                  description: (
+                    "**Resource:** `" + $resource + "`\n" +
+                    "**Version:** `" + $version + "`\n\n" +
+                    "**Changes**\n" + $changelog +
+                    (if $store != "" then "\n\n[View on Tebex](" + $store + ")" else "" end)
+                  ),
                   color: 14129719,
                   footer: { text: "Divine Interactive • Script Updates" }
                 }]
               }')
 
-            curl --fail-with-body               -H "Content-Type: application/json"               -d "$PAYLOAD"               "$DISCORD_WEBHOOK"
+            curl --fail-with-body \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD" \
+              "$DISCORD_WEBHOOK"
           done <<< "${{ steps.changed.outputs.files }}"
