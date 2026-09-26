@@ -1,6 +1,6 @@
 {
   "resource": "divine_vipshop",
   "name": "Divine VIP Shop",
-  "version": "1.0.0",
-  "changelog": "Initial release!"
+  "version": "1.0.1",
+  "changelog": "Added version checker"
 }
