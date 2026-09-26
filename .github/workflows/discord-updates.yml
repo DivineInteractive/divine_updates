@@ -1,0 +1,77 @@
+name: Discord Script Updates
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "*.json"
+
+permissions:
+  contents: read
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Find changed update files
+        id: changed
+        shell: bash
+        run: |
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            FILES=$(git ls-files '*.json')
+          else
+            FILES=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- '*.json')
+          fi
+
+          {
+            echo "files<<EOF"
+            echo "$FILES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post updates to Discord
+        if: steps.changed.outputs.files != ''
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_SCRIPT_UPDATES_WEBHOOK }}
+        shell: bash
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "DISCORD_SCRIPT_UPDATES_WEBHOOK is not configured."
+            exit 1
+          fi
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            [ ! -f "$file" ] && continue
+
+            NAME=$(jq -r '.name // .resource // "Divine Interactive Resource"' "$file")
+            RESOURCE=$(jq -r '.resource // "Unknown"' "$file")
+            VERSION=$(jq -r '.version // "Unknown"' "$file")
+            CHANGELOG=$(jq -r '.changelog // "No changelog provided."' "$file")
+            STORE=$(jq -r '.store // empty' "$file")
+
+            DESCRIPTION="**Resource:** \`$RESOURCE\`\n**Version:** \`$VERSION\`\n\n**Changes**\n$CHANGELOG"
+
+            if [ -n "$STORE" ]; then
+              DESCRIPTION="$DESCRIPTION\n\n[View on Tebex]($STORE)"
+            fi
+
+            PAYLOAD=$(jq -n               --arg username "Divine Interactive"               --arg title "📝 $NAME Update"               --arg description "$DESCRIPTION"               '{
+                username: $username,
+                embeds: [{
+                  title: $title,
+                  description: $description,
+                  color: 14129719,
+                  footer: { text: "Divine Interactive • Script Updates" }
+                }]
+              }')
+
+            curl --fail-with-body               -H "Content-Type: application/json"               -d "$PAYLOAD"               "$DISCORD_WEBHOOK"
+          done <<< "${{ steps.changed.outputs.files }}"
