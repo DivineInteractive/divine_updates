@@ -1,6 +1,6 @@
 {
   "resource": "divine_admin",
   "name": "Divine Admin",
-  "version": "1.0.2",
-  "changelog": "Current release"
+  "version": "1.0.3",
+  "changelog": "Added version checker"
 }
