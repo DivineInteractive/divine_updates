@@ -7,5 +7,7 @@ This repository only contains update metadata. Paid resource source code is not 
 ## Resources
 
 - Divine VIP Shop — `vipshop.json`
+- Divine Admin System — `adminmenu.json`
+- Divine Phone — `phone.json`
 
 Each Divine resource can check its matching JSON file and compare the installed version with the latest published version.
