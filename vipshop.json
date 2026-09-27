@@ -2,10 +2,5 @@
   "resource": "divine_vipshop",
   "name": "Divine VIP Shop",
   "version": "1.0.2",
-  "changelog": "### Added
-- Resizable UI for every player, not just admins. A `-` / `+` control in the shop's
-  topbar lets each player scale the whole tablet UI between 70% and 130%.
-- The chosen size is saved locally per player (via a client-side KVP) and is
-  restored automatically the next time they open the shop, including after a
-  server restart."
+  "changelog": "### Added\n- Resizable UI for every player, not just admins. A `-` / `+` control in the shop's topbar lets each player scale the whole tablet UI between 70% and 130%.\n- The chosen size is saved locally per player (via a client-side KVP) and is restored automatically the next time they open the shop, including after a server restart."
 }
